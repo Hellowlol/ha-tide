@@ -57,6 +57,10 @@ def to_data(data):
     for msg in root.iter("service"):
         _LOGGER.info("%s", msg.attrib.get("cominfo"))
 
+    for location in root.iter("location"):
+        for loc in location:
+            data["location"] = loc.attrib
+
     return data
 
 
@@ -92,7 +96,7 @@ class TideAPI:
         # the rest of the settings is hard coded for now.
         self.datatype = "tab"
         self.interval = config.get("interval", 10)
-        self.data = None
+        self.data = {}
         self._hass = hass
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -109,8 +113,13 @@ class TideAPI:
             res = await result.text()
             _LOGGER.info(result.status)
             _LOGGER.info(res)
-            data = to_data(res)
-            self.data = data
+            try:
+                data = to_data(res)
+                self.data = data
+            except ET.ParseError:
+                _LOGGER.warning("Failed to read the xml, response was %s", res)
+
+
 
         _LOGGER.info(data)
 
@@ -148,6 +157,7 @@ class TideSensor(Entity):
                 _LOGGER.info("Found %s", now)
                 self._state = value.get("flag")
                 self.attributes["water_level"] = value.get("value")
+                self.attributes.update(self.api.data.get("location", {}))
                 break
 
     @property
