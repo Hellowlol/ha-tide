@@ -109,8 +109,8 @@ class TideAPI:
         _LOGGER.info(url)
         sess = async_get_clientsession(self._hass)
         result = await sess.get(url)
-        if result:
-            res = await result.text()
+        res = await result.text()
+        if result and result.status == 200:
             _LOGGER.info(result.status)
             _LOGGER.info(res)
             try:
@@ -118,10 +118,8 @@ class TideAPI:
                 self.data = data
             except ET.ParseError:
                 _LOGGER.warning("Failed to read the xml, response was %s", res)
-
-
-
-        _LOGGER.info(data)
+        else:
+            _LOGGER.warning("Didnt get a proper response from the api status code %s", result.status)
 
     async def update(self):
         _LOGGER.info("tide api update")
