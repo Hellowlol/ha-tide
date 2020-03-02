@@ -89,8 +89,8 @@ def get_tide_xml_url(
 class TideAPI:
     def __init__(self, config, hass):
         # http://api.sehavniva.no/tideapi_protocol.pdf
-        self.lat = config.get("lat")
-        self.lon = config.get("lon")
+        self.lat = config.get("latitude")
+        self.lon = config.get("longitude")
         # the rest of the settings is hard coded for now.
         self.datatype = "tab"
         self.interval = config.get("interval", 10)
@@ -189,7 +189,7 @@ class TideSensor(Entity):
     @property
     def unique_id(self) -> str:
         """Return the name of the sensor."""
-        return f'tide_{self._config.get("lat")}_{self._config.get("lon")}'.replace(
+        return f'tide_{self._config.get("latitude")}_{self._config.get("longitude")}'.replace(
             ".", "_"
         )
 

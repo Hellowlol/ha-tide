@@ -2,8 +2,7 @@
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import (ATTR_ATTRIBUTION, CONF_LATITUDE,
-                                 CONF_LONGITUDE, STATE_UNKNOWN)
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_LATITUDE, CONF_LONGITUDE
 
 from . import DOMAIN
 
