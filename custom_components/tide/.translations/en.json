@@ -1,0 +1,18 @@
+{
+    "config": {
+        "title": "Tide",
+        "step": {
+            "user": {
+                "title": "Tide",
+                "description": "Information about the tide in norway",
+                "data": {
+                    "latitude": "Serial Port",
+                    "longitude": "Parity"
+                }
+            }
+        },
+        "error": {
+            "name_exists": "Name already exists"
+        }
+    }
+}

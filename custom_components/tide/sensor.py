@@ -1,21 +1,17 @@
 import logging
 import xml.etree.ElementTree as ET
-
 from collections import defaultdict
 from datetime import timedelta
 
-# from autologging import traced, TRACE
+import homeassistant.helpers.config_validation as cv
 import pendulum
 import voluptuous as vol
-
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import ATTR_ATTRIBUTION, STATE_UNKNOWN
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.util import Throttle
-
-from homeassistant.helpers.entity import Entity
-
+from homeassistant.const import (ATTR_ATTRIBUTION, CONF_LATITUDE,
+                                 CONF_LONGITUDE, STATE_UNKNOWN)
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
 
 from . import DOMAIN
 
@@ -26,8 +22,8 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=20)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Optional("lat", default=""): cv.string,
-        vol.Optional("lon", default=""): cv.string,
+        vol.Optional(CONF_LATITUDE, default=""): cv.string,
+        vol.Optional(CONF_LONGITUDE, default=""): cv.string,
     }
 )
 
