@@ -56,6 +56,9 @@ def to_data(data) -> dict:
     for location in root.iter("location"):
         data["location"] = location.attrib
 
+    for err in root.iter("error"):
+        _LOGGER.warning("%s", err.text)
+
     return data
 
 
