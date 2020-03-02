@@ -20,12 +20,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-# _LOGGER.setLevel(TRACE)
-
+HIGH_LOW_TO_STATE = {"high": "Ebb", "low": "Flow"}
 # What should be a good time for the updates?
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=20)
 
-# This should be float.
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Optional("lat", default=""): cv.string,
@@ -36,16 +34,15 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(
     hass, config_entry, async_add_devices, discovery_info=None
-):
+) -> True:
     """Setup sensor platform for the ui"""
     config = config_entry
     api = TideAPI(config, hass)
-    # await api.update()
     async_add_devices([TideSensor(api, hass, config)])
     return True
 
 
-def to_data(data):
+def to_data(data) -> dict:
     root = ET.fromstring(data)
     data = defaultdict(dict)
     for el in root.iter("data"):
@@ -55,11 +52,13 @@ def to_data(data):
     # Log any messages that the api might return i suddenly got
     # <service cominfo="Due to technical maintenance, the water level observations might be delayed from February 24 to February 28."/>
     for msg in root.iter("service"):
-        _LOGGER.info("%s", msg.attrib.get("cominfo"))
+        # Lets use a warning here as no good comes
+        # from cominfo anyway. Just want a warning to to easier to
+        # find in the logs for the users.
+        _LOGGER.warning("%s", msg.attrib.get("cominfo"))
 
     for location in root.iter("location"):
-        for loc in location:
-            data["location"] = loc.attrib
+        data["location"] = location.attrib
 
     return data
 
@@ -71,7 +70,7 @@ def get_tide_xml_url(
     time_to=None,
     datatype="tab",
     interval=10,
-):
+) -> str:
 
     if time_from is None:
         time_from = pendulum.today()
@@ -90,88 +89,110 @@ def get_tide_xml_url(
 
 class TideAPI:
     def __init__(self, config, hass):
-        _LOGGER.info("Started api")
+        # http://api.sehavniva.no/tideapi_protocol.pdf
         self.lat = config.get("lat")
         self.lon = config.get("lon")
         # the rest of the settings is hard coded for now.
         self.datatype = "tab"
         self.interval = config.get("interval", 10)
-        self.data = {}
+        self.data = defaultdict(dict)
         self._hass = hass
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
-    async def fetch(self):
-        _LOGGER.info("tide api fetch")
+    async def _fetch_ebb_and_flow(self) -> None:
+        """Fetches the url updates the data."""
+        _LOGGER.debug("tide api fetch")
         url = get_tide_xml_url(
             self.lat, self.lon, datatype=self.datatype, interval=self.interval
         )
         data = None
-        _LOGGER.info(url)
+        _LOGGER.debug(url)
         sess = async_get_clientsession(self._hass)
         result = await sess.get(url)
         res = await result.text()
         if result and result.status == 200:
-            _LOGGER.info(result.status)
-            _LOGGER.info(res)
+            _LOGGER.debug(result.status)
+            _LOGGER.debug(res)
             try:
                 data = to_data(res)
-                self.data = data
+                self.data["ebb_and_flow"] = data
             except ET.ParseError:
                 _LOGGER.warning("Failed to read the xml, response was %s", res)
         else:
-            _LOGGER.warning("Didnt get a proper response from the api status code %s", result.status)
+            _LOGGER.warning(
+                "Didnt get a proper response from the api status code %s %s",
+                result.status,
+                res,
+            )
 
-    async def update(self):
-        _LOGGER.info("tide api update")
-        await self.fetch()
+    async def update(self) -> None:
+        _LOGGER.debug("requested update")
+        await self._fetch_ebb_and_flow()
+
+    def ebb_and_flow(self) -> dict:
+        return self.data.get("ebb_and_flow", {})
 
 
-# @traced
 class TideSensor(Entity):
     def __init__(self, api, hass, config):
-        _LOGGER.info("started sensorz.")
+        _LOGGER.debug(config)
         self._api = api
         self._hass = hass
         self._config = config
         self.attributes = {ATTR_ATTRIBUTION: "kartverket"}
-        _LOGGER.info(config)
         self._state = STATE_UNKNOWN
 
-    async def async_update(self):
-        _LOGGER.info("called update")
+    async def async_update(self) -> None:
         await self._real_update()
 
-    async def _real_update(self):
-        _LOGGER.info("called _update")
+    async def _real_update(self) -> None:
         await self._api.update()
-        now = pendulum.now()
-        d = self._api.data.get("prediction", {})
+        data = self._api.ebb_and_flow()
+        d = data.get("prediction", {})
+
+        # Set the correct data for the requested location
+        # using the known offset from the measurement station.
         sorted_times = {k: d[k] for k in sorted(d)}
-        _LOGGER.info(sorted_times)
+        fixed_data = defaultdict(dict)
+        delay = int(data.get("location", {}).get("delay", 0))
+        factor = float(data.get("location", {}).get("factor", 1))
+
         for key, value in sorted_times.items():
-            _LOGGER.info(value)
             key = pendulum.parse(key)
-            if now > key:
-                _LOGGER.info("Found %s", now)
-                self._state = value.get("flag")
-                self.attributes["water_level"] = value.get("value")
-                self.attributes.update(self.api.data.get("location", {}))
+            key = key.add(minutes=delay)
+            dt_as_str = str(key)
+            val = float(value.get("value")) * factor
+            fixed_data[dt_as_str]["flag"] = value.get("flag")
+            fixed_data[dt_as_str]["value"] = val
+            fixed_data[dt_as_str]["time"] = dt_as_str
+
+        for fixed_key, fixed_value in fixed_data.items():
+            if pendulum.now() > pendulum.parse(fixed_key):
+                self._state = HIGH_LOW_TO_STATE[fixed_value.get("flag")]
+                self.attributes["high_water"] = (
+                    True if fixed_value.get("flag") == "high" else False
+                )
+                self.attributes["water_level"] = fixed_value.get("value")
+                self.attributes.update(data.get("location", {}))
+                self.attributes["water_levels"] = list(fixed_data.values())
                 break
 
     @property
     def icon(self) -> str:
-        """Shows the correct icon for container."""
-        # todo fix icons.
-        return "mdi:water"
+        """Just a icon."""
+        return "mdi:wave"
 
     @property
-    def state(self):
+    def state(self) -> str:
+        """State of the sensor"""
         return self._state
 
     @property
     def unique_id(self) -> str:
         """Return the name of the sensor."""
-        return f'tide_{self._config.get("lat")}_{self._config.get("lon")}'
+        return f'tide_{self._config.get("lat")}_{self._config.get("lon")}'.replace(
+            ".", "_"
+        )
 
     @property
     def name(self) -> str:
@@ -190,11 +211,6 @@ class TideSensor(Entity):
             "name": self.name,
             "manufacturer": DOMAIN,
         }
-
-    @property
-    def unit(self) -> int:
-        """Unit"""
-        return int
 
     @property
     def unit_of_measurement(self) -> str:
