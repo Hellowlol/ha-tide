@@ -19,15 +19,13 @@ Using your HA configuration directory (folder) as a starting point you should no
 ## Configuration options
 Key | Type | Required | Default | Description
 -- | -- | -- | -- | --
-`enabled` | `boolean` | `False` | `True` | Boolean to enable/disable the platform.
-`name` | `string` | `False` | `blueprint` | Custom name for the entity.
-`lat` | `string` | `False` | `blueprint` | Latitude
-`lon` | `string` | `False` | `blueprint` | Longitude
+`lat` | `string` | `True` | `""` | Latitude
+`lon` | `string` | `True` | `""` | Longitude
 
 
 ## Example sensors.yaml
 ````yaml
 - platform: tide
-  lat: 58.0791111
-  lon: 7.000001
+  longitude: 7.000001
+  latitude: 58.0791111
 ````
