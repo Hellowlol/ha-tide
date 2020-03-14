@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import timedelta
 
-import homeassistant.helpers.config_validation as cv
 import pendulum
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
