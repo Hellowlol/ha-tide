@@ -38,6 +38,21 @@ async def async_setup_platform(
     return True
 
 
+async def async_setup_entry(hass, config_entry, async_add_devices):
+    """Setup sensor platform for the ui"""
+    return await async_setup_platform(
+        hass, config_entry.data, async_add_devices, discovery_info=None
+    )
+
+
+async def async_remove_entry(hass, config_entry):
+    try:
+        await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+        _LOGGER.info("Successfully tide integration")
+    except ValueError:
+        pass
+
+
 def to_data(data) -> dict:
     root = ET.fromstring(data)
     data = defaultdict(dict)

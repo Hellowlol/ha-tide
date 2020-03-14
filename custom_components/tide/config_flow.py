@@ -23,7 +23,7 @@ class TideFlowHandler(config_entries.ConfigFlow):
 
         if user_input is not None:
             return self.async_create_entry(
-                title="Norwegian AMS", data=user_input)
+                title="Tide", data=user_input)
 
         return self.async_show_form(step_id="user", data_schema=vol.Schema({
             vol.Required(CONF_LATITUDE,
