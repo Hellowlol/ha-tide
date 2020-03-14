@@ -27,9 +27,9 @@ class TideFlowHandler(config_entries.ConfigFlow):
 
         return self.async_show_form(step_id="user", data_schema=vol.Schema({
             vol.Required(CONF_LATITUDE,
-                         default="1"): vol.All(str),
+                         default=1.0): vol.Coerce(float),
             vol.Required(CONF_LONGITUDE,
-                         default="1"): vol.All(str)
+                         default=1.0): vol.Coerce(float)
         }), errors=self._errors)
 
     async def async_step_import(self, user_input=None):
