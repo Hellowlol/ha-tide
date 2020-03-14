@@ -6,8 +6,8 @@
                 "title": "Tide",
                 "description": "Information about the tide in norway",
                 "data": {
-                    "latitude": "Serial Port",
-                    "longitude": "Parity"
+                    "latitude": "latitude",
+                    "longitude": "longitude"
                 }
             }
         },

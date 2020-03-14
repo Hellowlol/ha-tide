@@ -1,0 +1,13 @@
+{
+  "domain": "tide",
+  "name": "Tide",
+  "documentation": "https://github.com/Hellowlol/ha-tide",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": [
+    "@hellowlol"
+  ],
+  "requirements": [
+  ],
+  "homeassistant": "0.96.0"
+}
