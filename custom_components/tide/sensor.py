@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import timedelta
 
+import homeassistant.helpers.config_validation as cv
 import pendulum
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -21,8 +22,8 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=20)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_LATITUDE, default=""): vol.Coerce(float),
-        vol.Required(CONF_LONGITUDE, default=""): vol.Coerce(float),
+        vol.Required(CONF_LATITUDE, default=""): vol.latitude,
+        vol.Required(CONF_LONGITUDE, default=""): vol.longitude,
     }
 )
 
@@ -185,8 +186,8 @@ class TideSensor(Entity):
                 self.attributes["high_water"] = (
                     True if fixed_value.get("flag") == "high" else False
                 )
-                self.attributes["water_level"] = fixed_value.get("value")
                 self.attributes.update(data.get("location", {}))
+                self.attributes["water_level"] = fixed_value.get("value")
                 self.attributes["water_levels"] = list(fixed_data.values())
                 break
 
