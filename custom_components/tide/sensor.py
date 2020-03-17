@@ -22,8 +22,8 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=20)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_LATITUDE, default=""): vol.latitude,
-        vol.Required(CONF_LONGITUDE, default=""): vol.longitude,
+        vol.Required(CONF_LATITUDE, default=""): cv.latitude,
+        vol.Required(CONF_LONGITUDE, default=""): cv.longitude,
     }
 )
 
