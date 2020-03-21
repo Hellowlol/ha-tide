@@ -7,7 +7,6 @@
   "codeowners": [
     "@hellowlol"
   ],
-  "requirements": [
-  ],
+  "requirements": ["pendulum>=2.0"],
   "homeassistant": "0.96.0"
 }
