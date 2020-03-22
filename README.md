@@ -1,4 +1,4 @@
-## Tide a sensor for HASS.
+## Tide a (norwegian tide water) sensor for HASS.
 
 
 ## Installation
