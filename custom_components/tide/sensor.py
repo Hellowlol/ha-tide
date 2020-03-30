@@ -4,7 +4,6 @@ from collections import defaultdict
 from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
-import pendulum
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (ATTR_ATTRIBUTION, CONF_LATITUDE,
@@ -12,6 +11,7 @@ from homeassistant.const import (ATTR_ATTRIBUTION, CONF_LATITUDE,
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
+from homeassistant.util import dt as dt_utils
 
 from . import DOMAIN
 
@@ -87,15 +87,17 @@ def get_tide_xml_url(
 ) -> str:
 
     if time_from is None:
-        time_from = pendulum.today()
+        time_from = dt_utils.start_of_local_day()
+        time_from_str = time_from.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     if time_to is None:
-        time_to = pendulum.tomorrow().at(hour=23, minute=59, second=59)
+        time_to = dt_utils.start_of_local_day() + timedelta(days=1, hours=23, minutes=59, seconds=59)
+        time_to_str = time_to.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     url = (
-        f"http://api.sehavniva.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from.isoformat()}"
-        f"&totime={time_to.isoformat()}&datatype={datatype}&refcode=cd&place=&file=&lang=en&"
-        f"interval={interval}&dst=0&tzone=0&tide_request=locationdata"
+        f"http://api.sehavniva.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from_str}"
+        f"&totime={time_to_str}&datatype={datatype}&refcode=cd&place=&file=&lang=en&"
+        f"interval={interval}&dst=0&tzone=1&tide_request=locationdata"
     )
 
     return url
@@ -172,8 +174,8 @@ class TideSensor(Entity):
         factor = float(data.get("location", {}).get("factor", 1))
 
         for key, value in sorted_times.items():
-            key = pendulum.parse(key)
-            key = key.add(minutes=delay)
+            key = dt_utils.parse_datetime(key)
+            key = key + timedelta(minutes=delay)
             dt_as_str = str(key)
             val = float(value.get("value")) * factor
             fixed_data[dt_as_str]["flag"] = value.get("flag")
@@ -181,7 +183,7 @@ class TideSensor(Entity):
             fixed_data[dt_as_str]["time"] = dt_as_str
 
         for fixed_key, fixed_value in fixed_data.items():
-            if pendulum.now() > pendulum.parse(fixed_key):
+            if dt_utils.now() > dt_utils.parse_datetime(fixed_key):
                 self._state = HIGH_LOW_TO_STATE[fixed_value.get("flag")]
                 self.attributes["high_water"] = (
                     True if fixed_value.get("flag") == "high" else False
