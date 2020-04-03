@@ -168,7 +168,7 @@ class TideSensor(Entity):
 
         # Set the correct data for the requested location
         # using the known offset from the measurement station.
-        sorted_times = {k: d[k] for k in sorted(d)}
+        sorted_times = {k: d[k] for k in sorted(d, reverse=True)}
         fixed_data = defaultdict(dict)
         delay = int(data.get("location", {}).get("delay", 0))
         factor = float(data.get("location", {}).get("factor", 1))
@@ -184,13 +184,16 @@ class TideSensor(Entity):
 
         for fixed_key, fixed_value in fixed_data.items():
             if dt_utils.now() > dt_utils.parse_datetime(fixed_key):
+                _LOGGER.debug("Selected %r as current values for state and attributes", fixed_value)
                 self._state = HIGH_LOW_TO_STATE[fixed_value.get("flag")]
                 self.attributes["high_water"] = (
                     True if fixed_value.get("flag") == "high" else False
                 )
                 self.attributes.update(data.get("location", {}))
                 self.attributes["water_level"] = fixed_value.get("value")
-                self.attributes["water_levels"] = list(fixed_data.values())
+                self.attributes["water_levels"] = list(reversed(list(fixed_data.values())))
+                self.attributes["station_name"] = self.attributes["name"]
+                del self.attributes["name"]
                 break
 
     @property
