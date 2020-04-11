@@ -5,7 +5,7 @@ This is what my final result looks like:
 
 ![Simple](/lovelace_example/ha-tide.PNG)
 
-As you already may have noticed, the language used in the example is norwegian. Tide works only using norwegian coordinates as data is provided by Kartverket.
+As you may have noticed, the language used in the example is norwegian. Tide only works using norwegian coordinates as data is provided by Kartverket.
 
 First thing to do is to make template sensors from some of the attributes. Your sensor's entity id is presumably something other than mine. Remember to replace "sensor.tide_58_0795928_7_8038319" with your own.
 In sensors.yaml you add:
