@@ -7,7 +7,7 @@ This is what my final result looks like:
 
 As you already may have noticed, the language used in the example is norwegian. Tide works only using norwegian coordinates as data is provided by Kartverket.
 
-First thing to do is making some template sensors from some of the attributes.
+First thing to do is to make template sensors from some of the attributes.
 In sensors.yaml you add:
 
 ````
@@ -175,157 +175,324 @@ In sensors.yaml you add:
 
 ````
 
-For a complete list of attributes see `zaptec_home_api_data.txt`.
+Save and restart HA to see that the template sensors works.
 
-Here are a couple of configuration examples for a single phase installation.
-Add the following to your `sensors.yaml` file to make some sensors from the attributes.
+Now it's time to make the lovelace card.
+This example is based on using ui-lovelace.yaml (mode: yaml # in configuration.yaml). As you'll see it takes a lot of repeating code to configure the button-card objects. Usually best practice is to make templates to use with the button-card. Templates is outside the the scope of this example, and making templates is very well explained by RomRaider in the button-card repository.
 
-#### TEMPLATE SENSORS (change "zch000000" to your charger's id)
+In this example the lovelace card is placed in it's own view called "Flo og fjære". Add the following code to the desired location in your ui-lovelace.yaml file:
+
 ````
-- platform: template
-  sensors:
-    zaptec_home_allocated:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger allocated current"
-      icon_template: mdi:waves
-      unit_of_measurement: "A"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'charge_current_set') | round(0) }}"
-
-    zaptec_home_current:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger current"
-      icon_template: mdi:current-ac
-      unit_of_measurement: "A"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'current_phase1') | round(0) }}"
-
-    zaptec_home_energy:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger energy"
-      icon_template: mdi:counter
-      unit_of_measurement: "kWh"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'total_charge_power_session') | round(0) }}"
-
-    zaptec_home_firmware:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger firmware version"
-      icon_template: mdi:label
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'smart_computer_software_application_version') }}"
-
-    zaptec_home_humidity:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger humidity"
-      icon_template: mdi:water-percent
-      unit_of_measurement: "%"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'humidity') | round(0) }}"
-
-    zaptec_home_mode:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger mode"
-      icon_template: mdi:alpha-z-circle-outline
-      value_template: >-
-        {% if is_state_attr('sensor.zaptec_zch000000', 'charger_operation_mode', '1') %}
-          Disconnected
-        {% elif is_state_attr('sensor.zaptec_zch000000', 'charger_operation_mode', '2') %}
-          Waiting
-        {% elif is_state_attr('sensor.zaptec_zch000000', 'charger_operation_mode', '3') %}
-          Charging
-        {% elif is_state_attr('sensor.zaptec_zch000000', 'charger_operation_mode', '5') %}
-          Finished
-        {% else %}
-          Unknown
-        {% endif %}
-
-    zaptec_home_power:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger power"
-      icon_template: mdi:power-plug
-      unit_of_measurement: "W"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'total_charge_power') | round(0) }}"
-
-    zaptec_home_signal:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger signal strength"
-      icon_template: >-
-        {% if state_attr('sensor.zaptec_zch000000', 'communication_signal_strength') | float >= -67 %}
-          mdi:wifi-strength-4
-        {% elif state_attr('sensor.zaptec_zch000000', 'communication_signal_strength') | float >= -72 %}
-          mdi:wifi-strength-3
-        {% elif state_attr('sensor.zaptec_zch000000', 'communication_signal_strength') | float >= -80 %}
-          mdi:wifi-strength-2
-        {% elif state_attr('sensor.zaptec_zch000000', 'communication_signal_strength') | float >= -90 %}
-          mdi:wifi-strength-1
-        {% else %}
-          mdi:wifi-strength-outline
-        {% endif %}
-      unit_of_measurement: "dBm"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'communication_signal_strength') }}"
-
-    zaptec_home_state:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger state"
-      icon_template: >-
-        {% if is_state_attr('sensor.zaptec_zch000000', 'is_online', '1') %}
-          mdi:access-point-network
-        {% else %}
-          mdi:access-point-network-off
-        {% endif %}
-      value_template: >-
-        {% if is_state_attr('sensor.zaptec_zch000000', 'is_online', '1') %}
-          Online
-        {% else %}
-          Offline
-        {% endif %}
-
-    zaptec_home_temperature:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger temperature"
-      icon_template: mdi:thermometer
-      unit_of_measurement: '°C'
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'temperature_internal5') | round(0) }}"
-
-    zaptec_home_voltage:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger voltage"
-      icon_template: mdi:flash
-      unit_of_measurement: "V"
-      value_template: "{{ state_attr('sensor.zaptec_zch000000', 'voltage_phase1') | round(0) }}"
-
-    zaptec_home_warnings:
-      entity_id: sensor.zaptec_zch000000
-      friendly_name: "Car charger warnings"
-      icon_template: mdi:alert-circle-outline
-      value_template: >-
-        {% if is_state_attr('sensor.zaptec_zch000000', 'warnings', '0') %}
-          No warnings
-        {% else %}
-          Failure
-        {% endif %}
-````
-    
-Then add the following to your lovelace configuration to make a simple card in Home Assistant.
-````	
-  - title: Car charger entity card
-    icon: mdi:ev-station
+title: My Home Assistant
+views:
+  - title: Flo og Fjære
+    icon: mdi:wave
     background: white
     cards:
       - type: vertical-stack
         cards:
-          - type: entities
-            title: Car charger
-            show_header_toggle: false
-            entities:
-              - sensor.zaptec_home_mode
-              - sensor.zaptec_home_state
-              - sensor.zaptec_home_signal
-              - sensor.zaptec_home_allocated
-              - sensor.zaptec_home_temperature
-              - sensor.zaptec_home_humidity
-              - sensor.zaptec_home_current
-              - sensor.zaptec_home_voltage
-              - sensor.zaptec_home_power
-              - sensor.zaptec_home_energy
-              - sensor.zaptec_home_warnings
-              - sensor.zaptec_home_firmware
+          - type: custom:stack-in-card
+            title: Flo og fjære
+            mode: vertical
+            keep:
+              margin: false
+              outer_padding: false
+            style: |
+              ha-card {
+                background: url(/local/images/tidevann.png);
+                border-radius: 10px;
+                padding-bottom: 5px;
+            cards:
+              - type: vertical-stack
+                cards:
+                  - type: entities
+                    entities:
+                      - sensor.tidevann_tilstand
+                      - entity: sensor.tide_58_0795928_7_8038319
+                        type: custom:multiple-entity-row
+                        name: Målestasjon
+                        show_state: false
+                        entities:
+                          - attribute: delay
+                            name: Forsinkelse
+                            unit: "min"
+                          - attribute: factor
+                            name: Faktor
+                          - attribute: obsname
+                            name: Stasjon
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+                  - type: custom:button-card
+                    entity: sensor.tidevann_1
+                    label: >
+                      [[[
+                        return states['sensor.tidevann_1'].attributes.tidspunkt;
+                      ]]]
+                    show_state: true
+                    show_label: true
+                    aspect_ratio: 1/1.5
+                    tap_action:
+                      action: more_info
+                    styles:
+                      grid:
+                        - grid-template-areas: '"l" "i" "n" "s"'
+                        - grid-template-columns: 1fr
+                        - grid-template-rows: min-content 1fr min-content min-content
+                      img_cell:
+                        - align-self: start
+                        - text-align: start
+                        - margin-right: 10px
+                        - margin-left: 0px
+                      icon:
+                        - width: 35%
+                        - margin-left: 5px
+                      name:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 16px
+                        - font-weight: bold
+                        - color: black
+                      state:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 14px
+                      label:
+                        - justify-self: center
+                        - padding-top: 10px
+                        - font-family: Helvetica
+                        - font-size: 12px
+                        - color: black
+                    state:
+                      - operator: "default"
+                        styles:
+                          card:
+                            - background: rgba(252,252,252,.5)
+                            - border-radius: 5px
+                          icon:
+                            - color: '#00a6f8'
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+                  - type: custom:button-card
+                    entity: sensor.tidevann_2
+                    label: >
+                      [[[
+                        return states['sensor.tidevann_2'].attributes.tidspunkt;
+                      ]]]
+                    show_state: true
+                    show_label: true
+                    aspect_ratio: 1/1.5
+                    tap_action:
+                      action: more_info
+                    styles:
+                      grid:
+                        - grid-template-areas: '"l" "i" "n" "s"'
+                        - grid-template-columns: 1fr
+                        - grid-template-rows: min-content 1fr min-content min-content
+                      img_cell:
+                        - align-self: start
+                        - text-align: start
+                        - margin-right: 10px
+                        - margin-left: 0px
+                      icon:
+                        - width: 35%
+                        - margin-left: 5px
+                      name:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 16px
+                        - font-weight: bold
+                        - color: black
+                      state:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 14px
+                      label:
+                        - justify-self: center
+                        - padding-top: 10px
+                        - font-family: Helvetica
+                        - font-size: 12px
+                        - color: black
+                    state:
+                      - operator: "default"
+                        styles:
+                          card:
+                            - background: rgba(252,252,252,.5)
+                            - border-radius: 5px
+                          icon:
+                            - color: '#00a6f8'
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+                  - type: custom:button-card
+                    entity: sensor.tidevann_3
+                    label: >
+                      [[[
+                        return states['sensor.tidevann_3'].attributes.tidspunkt;
+                      ]]]
+                    show_state: true
+                    show_label: true
+                    aspect_ratio: 1/1.5
+                    tap_action:
+                      action: more_info
+                    styles:
+                      grid:
+                        - grid-template-areas: '"l" "i" "n" "s"'
+                        - grid-template-columns: 1fr
+                        - grid-template-rows: min-content 1fr min-content min-content
+                      img_cell:
+                        - align-self: start
+                        - text-align: start
+                        - margin-right: 10px
+                        - margin-left: 0px
+                      icon:
+                        - width: 35%
+                        - margin-left: 5px
+                      name:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 16px
+                        - font-weight: bold
+                        - color: black
+                      state:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 14px
+                      label:
+                        - justify-self: center
+                        - padding-top: 10px
+                        - font-family: Helvetica
+                        - font-size: 12px
+                        - color: black
+                    state:
+                      - operator: "default"
+                        styles:
+                          card:
+                            - background: rgba(252,252,252,.5)
+                            - border-radius: 5px
+                          icon:
+                            - color: '#00a6f8'
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+                  - type: custom:button-card
+                    entity: sensor.tidevann_4
+                    label: >
+                      [[[
+                        return states['sensor.tidevann_4'].attributes.tidspunkt;
+                      ]]]
+                    show_state: true
+                    show_label: true
+                    aspect_ratio: 1/1.5
+                    tap_action:
+                      action: more_info
+                    styles:
+                      grid:
+                        - grid-template-areas: '"l" "i" "n" "s"'
+                        - grid-template-columns: 1fr
+                        - grid-template-rows: min-content 1fr min-content min-content
+                      img_cell:
+                        - align-self: start
+                        - text-align: start
+                        - margin-right: 10px
+                        - margin-left: 0px
+                      icon:
+                        - width: 35%
+                        - margin-left: 5px
+                      name:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 16px
+                        - font-weight: bold
+                        - color: black
+                      state:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 14px
+                      label:
+                        - justify-self: center
+                        - padding-top: 10px
+                        - font-family: Helvetica
+                        - font-size: 12px
+                        - color: black
+                    state:
+                      - operator: "default"
+                        styles:
+                          card:
+                            - background: rgba(252,252,252,.5)
+                            - border-radius: 5px
+                          icon:
+                            - color: '#00a6f8'
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+                  - type: custom:button-card
+                    entity: sensor.tidevann_5
+                    label: >
+                      [[[
+                        return states['sensor.tidevann_5'].attributes.tidspunkt;
+                      ]]]
+                    show_state: true
+                    show_label: true
+                    aspect_ratio: 1/1.5
+                    tap_action:
+                      action: more_info
+                    styles:
+                      grid:
+                        - grid-template-areas: '"l" "i" "n" "s"'
+                        - grid-template-columns: 1fr
+                        - grid-template-rows: min-content 1fr min-content min-content
+                      img_cell:
+                        - align-self: start
+                        - text-align: start
+                        - margin-right: 10px
+                        - margin-left: 0px
+                      icon:
+                        - width: 35%
+                        - margin-left: 5px
+                      name:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 16px
+                        - font-weight: bold
+                        - color: black
+                      state:
+                        - justify-self: center
+                        - font-family: Helvetica
+                        - font-size: 14px
+                      label:
+                        - justify-self: center
+                        - padding-top: 10px
+                        - font-family: Helvetica
+                        - font-size: 12px
+                        - color: black
+                    state:
+                      - operator: "default"
+                        styles:
+                          card:
+                            - background: rgba(252,252,252,.5)
+                            - border-radius: 5px
+                          icon:
+                            - color: '#00a6f8'
+                  - type: custom:button-card
+                    color_type: blank-card
+                    styles:
+                      card:
+                        - width: 5px
+
 ````
 
 And it will look like this:
