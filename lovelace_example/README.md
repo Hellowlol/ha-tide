@@ -1,4 +1,4 @@
-### How to make a nice Lovelace card using the tide sensor and it's attributes
+### How to make a nice Lovelace card using Tide sensor and it's attributes
 
 In this example we're using HACS plugins "button-card", "card-mod", "Multiple Entity Row" and "Stack in card". You also need a photo for the backgroud. Just find something you like. Aspect ratio 4:3 works well.
 This is what my final result looks like:
@@ -494,4 +494,4 @@ views:
                         - width: 5px
 
 ````
-Now, the lovelace card is made.
+Now, the lovelace card is ready made.
