@@ -1,23 +1,178 @@
-The most common wanted_attributes are:
+#### How to make a nice Lovelace card of the tide sensor and attributes
+
+In this example we're using HACS plugins "button-card", "card-mod", "Multiple Entity Row" and "Stack in card". You also need a photo for the backgroud. Just find something you like. Aspect ratio 4:3 works well.
+This is what my final result looks like:
+
+![Simple](/lovelace_example/ha-tide.PNG)
+
+As you already may have noticed, the language used in the example is norwegian. Tide works only using norwegian coordinates as data is provided by Kartverket.
+
+First thing to do is making some template sensors from some of the attributes.
+In sensors.yaml you add:
 
 ````
--2: is online, 0=offline, 1=online
-201: internal temperature 5, °C
-202: internal temperature 6, °C
-270: humidity, %
-501: voltage phase 1, V
-502: voltage phase 2, V
-503: voltage phase 3, V
-507: current phase 1, A
-508: current phase 2, A
-509: current phase 3, A
-513: total charge power, W
-553: total charge power session, kWh
-708: charge current set, A
-710: charger operation mode, 0=unknown, 1=disconnected, 2=connected requesting, 3=connected charging, 5=connected finished
-804: warnings, see "zaptec_home_api_data.txt"
-809: communication signal strength, dBm
-911: smart computer software application version (a.k.a. firmware)
+# TEMPLATE SENSORS
+- platform: template
+  sensors:
+    # Tide
+    tidevann_tilstand:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name: 'Tidevann'
+      icon_template: "{% if is_state('sensor.tide_58_0795928_7_8038319', 'Flow') %}mdi:transfer-up{% else %}mdi:transfer-down{% endif %}"
+      value_template: "{% if is_state('sensor.tide_58_0795928_7_8038319', 'Flow') %}Flo sjø{% else %}Fjære sjø{% endif %}"
+
+    tidevann_1:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[0].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[0].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[0].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[0].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_2:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[1].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[1].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[1].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[1].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_3:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[2].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[2].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[2].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[2].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_4:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[3].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[3].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[3].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[3].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_5:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[4].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[4].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[4].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[4].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_6:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[5].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[5].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[5].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[5].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_7:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[6].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[6].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[6].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[6].time) | timestamp_custom('%d.%m %H:%M') }}"
+
+    tidevann_8:
+      entity_id: sensor.tide_58_0795928_7_8038319
+      friendly_name_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[7].flag == 'low' %}
+          Fjære
+        {% else %}
+          Flo
+        {% endif %}
+      icon_template: >-
+        {% if states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[7].flag == 'low' %}
+          mdi:wave
+        {% else %}
+          mdi:waves
+        {% endif %}
+      unit_of_measurement: "cm"
+      value_template: "{{ states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[7].value | round(0) }}"
+      attribute_templates:
+        tidspunkt: "{{ as_timestamp(states.sensor.tide_58_0795928_7_8038319.attributes.water_levels[7].time) | timestamp_custom('%d.%m %H:%M') }}"
+
 ````
 
 For a complete list of attributes see `zaptec_home_api_data.txt`.
