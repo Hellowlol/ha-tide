@@ -8,7 +8,7 @@ DOMAIN = "tide"
 _LOGGER = logging.getLogger(__name__)
 
 NAME = DOMAIN
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 ISSUEURL = "https://github.com/hellowlol/ha-tide/issues"
 
 STARTUP = """
