@@ -95,7 +95,7 @@ def get_tide_xml_url(
         time_to_str = time_to.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     url = (
-        f"http://api.sehavniva.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from_str}"
+        f"http://vannstand.kartverket.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from_str}"
         f"&totime={time_to_str}&datatype={datatype}&refcode=cd&place=&file=&lang=en&"
         f"interval={interval}&dst=0&tzone=1&tide_request=locationdata"
     )
@@ -105,7 +105,7 @@ def get_tide_xml_url(
 
 class TideAPI:
     def __init__(self, config, hass):
-        # http://api.sehavniva.no/tideapi_protocol.pdf
+        # http://vannstand.kartverket.no/tideapi_protocol.pdf
         self.lat = config.get("latitude")
         self.lon = config.get("longitude")
         # the rest of the settings is hard coded for now.
