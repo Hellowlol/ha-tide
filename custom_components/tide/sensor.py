@@ -95,7 +95,7 @@ def get_tide_xml_url(
         time_to_str = time_to.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     url = (
-        f"http://api.sehavniva.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from_str}"
+        f"https://vannstand.kartverket.no/tideapi.php?lat={lat}&lon={lon}&fromtime={time_from_str}"
         f"&totime={time_to_str}&datatype={datatype}&refcode=cd&place=&file=&lang=en&"
         f"interval={interval}&dst=0&tzone=1&tide_request=locationdata"
     )
@@ -218,7 +218,7 @@ class TideSensor(Entity):
         return self.unique_id
 
     @property
-    def device_state_attributes(self) -> dict:
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return self.attributes
 
