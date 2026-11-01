@@ -1,14 +1,15 @@
 import logging
 
 from homeassistant import config_entries
-from homeassistant.core import Config, HomeAssistant
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import ConfigType
 
 DOMAIN = "tide"
 
 _LOGGER = logging.getLogger(__name__)
 
 NAME = DOMAIN
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 ISSUEURL = "https://github.com/hellowlol/ha-tide/issues"
 
 STARTUP = """
@@ -24,7 +25,7 @@ If you have any issues with this you need to open an issue here:
 )
 
 
-async def async_setup(hass: HomeAssistant, config: Config) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up this component using YAML."""
     _LOGGER.info(STARTUP)
     if config.get(DOMAIN) is None:
@@ -49,7 +50,7 @@ async def async_setup_entry(
 ) -> bool:
     """Set up tide as config entry."""
 
-    hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     return True
 
 

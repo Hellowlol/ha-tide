@@ -4,6 +4,6 @@
   "country": "NOR",
   "domains": ["sensors"],
   "iot_class": "cloud_poll",
-  "homeassistant": "0.96.0",
+  "homeassistant": "2022.8.0",
   "render_readme": true
 }
